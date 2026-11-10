@@ -90,6 +90,8 @@ public:
             }
         }
 
+        // cout << "total servers: " << result << endl;
+
         // quick check: If there are ((m*n)/2)+1 servers, that means all the servers are connected.
         if (result >= (((grid.size()*grid[0].size())/2) + 1))
             return result;
@@ -152,12 +154,16 @@ public:
                         serverCandidates.push({rowKey, col});
                         ++considering;
                         rmvCol = true;
+                        break;
                     }
                 }
 
                 if (rmvCol)
                     rVec.erase(it, it+1);
             }
+
+            // cout << "map after removing (count so far: "<<considering<<"):\n";
+            // printMap();
 
             // update `result` based on this "network" size
             if (serverCandidates.size() == 0)
