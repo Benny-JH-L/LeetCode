@@ -13,16 +13,14 @@ public:
     bool getCandidate(unordered_map<sint, vector<sint>>& serversMap, array<sint,2>& candidate)
     {
         // get an arbitrary server
-        for (auto& pair : serversMap)
+        for (const auto& [row, colVec] : serversMap)
         {
-            auto& [row, colVec] = pair;
-
             // make sure it's not empty 
             if (colVec.size() == 0)
                 continue;
             
             candidate = {row, colVec[0]};
-            remove(colVec.begin(), colVec.end(), colVec[0]);    // remove
+            // remove(colVec.begin(), colVec.end(), colVec[0]); // this is done in the main code anyway.
             // cout << "candidate: (" << row << ", " << colVec[0] <<")"<< endl;
             return true;
         }
@@ -73,19 +71,28 @@ public:
         current communication size = 6 servers.
         Server entries: [(0,0),(1,1),(1,2),(2,2)] wont contribute to the stack as they will check the hashmap and see nothing for their respective rows and cols.
         checking the next entry we only get 1. and the max of (6,1) is 6, which is the result.
+
+        Note: If there are ((m*n)/2) +1 servers, that means all the servers are connected.
         */
 
         unordered_map<sint, vector<sint>> serverMap {};
-
+        int result {};  // track server count for now
         for (int r = 0; r < grid.size(); ++r)
         {
             vector<int>& row = grid[r];
             for (int c = 0; c < row.size(); ++c)
             {
                 if (row[c]) // check if it is '1'
+                {
                     serverMap[r].push_back(c);    // add to the map
+                    ++result;
+                }
             }
         }
+
+        // quick check: If there are ((m*n)/2)+1 servers, that means all the servers are connected.
+        if (result >= (((grid.size()*grid[0].size())/2) + 1))
+            return result;
 
         auto printMap = [&serverMap]()
         {
@@ -97,18 +104,14 @@ public:
                 cout << "]" << endl;
             }
         };
-
-        // printMap();
         
-        int result {}, considering {};
+        result = 0;  // will now count server communication count
+        int considering {};
         array<sint, 2> candidate {};
         stack<array<sint, 2>> serverCandidates {};
         
         if (getCandidate(serverMap, candidate))
-        {
             serverCandidates.push(candidate);
-            ++result;
-        }
         // no candidate found
         else
             return 0;
@@ -119,9 +122,10 @@ public:
             serverCandidates.pop();
             
             auto& [row, col] = candidate;
-            cout << "candidate: (" << row << ", " << col <<")"<< endl;
-            cout << "map: \n";
-            printMap();
+
+            // cout << "candidate: (" << row << ", " << col <<")"<< endl;
+            // cout << "map: \n";
+            // printMap();
 
             // get all servers along its row
             vector<sint>& rowVec = serverMap[row];
@@ -130,8 +134,8 @@ public:
             considering += rowVec.size();    // add all the servers along this row
             serverMap[row].clear();     // remove the whole row, do not need to consider it for rest of this "network", or across other "networks"
             
-            cout << "removing row<"<<row<<">\n";
-            printMap();
+            // cout << "removing row<"<<row<<">\n";
+            // printMap();
             
             // get all servers along its col
             for (auto& pair : serverMap)
@@ -158,8 +162,8 @@ public:
             // update `result` based on this "network" size
             if (serverCandidates.size() == 0)
             {
-                // take the largest result found so far
-                result = max(result, considering);
+                if (considering > 1)
+                    result += considering;
                 considering = 0;
 
                 // find another server network
@@ -170,6 +174,6 @@ public:
             }
         }
 
-        return result;
+        return (result == 1 ? 0 : result);  // if result is 1, only communicates with itself, so server is not communicating with other servers.
     }
 };
