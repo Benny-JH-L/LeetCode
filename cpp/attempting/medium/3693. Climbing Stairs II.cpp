@@ -76,7 +76,7 @@ public:
 
             // check steps `i+1`, `i+2`, `i+3`, but do not go over `n-1` steps
             int cost {};
-            for (int j = i + 1; j <= n; ++j)
+            for (int j = i + 1; j <= min(i + 3, n); ++j)
             {
                 cost = dp[i] + costs[j-1] + ((j - i) * (j - i));    // compute the min cost to get to step j from step i, recall `costs` is 1-indexed 
                 // cout << "cost = " << "dp["<<i<<"] + " << costs[j-1] << " + " << (((j - i) * (j - i))) << " = " << cost << endl;
@@ -84,6 +84,7 @@ public:
             }
         }
 
+        // printDp();
         return dp[n];
     }
 };
