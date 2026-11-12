@@ -1,3 +1,8 @@
+
+#include<climits>
+#include<vector>
+#include<cmath>
+
 class Solution 
 {
 public:
@@ -50,7 +55,35 @@ public:
         return DP[`n`] = DP[4] = 13.
         */
 
-        int result {};
-        return result;
+        // for (int i = 1; i < 1001; ++i)
+        //     cout << i << ", ";
+        // return -1;
+
+        vector<int> dp (n+1, INT_MAX);
+        dp[0] = 0;  // start at step 0
+
+        auto printDp = [&dp]()
+        {
+            cout << "[";
+            for (int i = 0; i < dp.size(); ++i)
+                cout << dp[i] << ", ";
+            cout << "]" << endl;
+        };
+
+        for (int i = 0; i < n; ++i)
+        {
+            // printDp();
+
+            // check steps `i+1`, `i+2`, `i+3`, but do not go over `n-1` steps
+            int cost {};
+            for (int j = i + 1; j <= n; ++j)
+            {
+                cost = dp[i] + costs[j-1] + ((j - i) * (j - i));    // compute the min cost to get to step j from step i, recall `costs` is 1-indexed 
+                // cout << "cost = " << "dp["<<i<<"] + " << costs[j-1] << " + " << (((j - i) * (j - i))) << " = " << cost << endl;
+                dp[j] = min(cost, dp[j]);                           // store the min cost
+            }
+        }
+
+        return dp[n];
     }
 };
