@@ -1,70 +1,27 @@
+
+#include<queue>
+#include<cmath>
+
 class Solution 
 {
 public:
+    void addSubarrayCount(const queue<int>& subarray, long long& result)
+    {
+        int size = subarray.size();
+        result += ((size * (size + 1)) / 2);
+        
+        int count = ((size * (size + 1)) / 2);
+        cout << "subarray size: " << size << " | decreasing subarray's found: " << count << endl;
+    }
+
     long long countNonDecreasingSubarrays(vector<int>& nums, int k) 
     {
         /*
-        Idea:
-        Start with an empty subarray.
-        Add one element to it and increase the count by 1 (single element subarrays are always non-decreasing).
-        Adding the next element, (again increase count by 1).
-            now we check the subarray of size 2, 
-                - if it is not non-decrasing, compute if it is possible to make it non-decreasing. 
-                    - If it is not possible we can skip making the subarrays with this prefix and start with the next ones.
-                    - If it is possible, we can continue with this subarray but also keep the changes so we do not repeat work.
-                - otherwise keep checking.
-        Addint additional element
-            check subarray of size 3, 
-                - we know size 2 subarray is valid, so we need to check this element with the previous element. (we have a guarantee that elements from 0-n-1 in the subarray are non-decreasing but adding `n`th element we need to check with n-1 element)
-        
-        Ex.
-        nums = [6,3,1,2,4,4], k = 7
-        
-        sub = [6]   // was empty but we'll start with 2.
-        subStart = 0    // index in nums that this sub array is starting from
-        subEnd = 0      // index in nums that this sub array is ending at
-        count = 1       // count of subarrays that are non-decreasing that we've found
-
-        sub = [6,3] 
-        subStart = 0
-        subEnd = 1
-            | converted to sub = [6,6] k = 4 (used 3 operations) to make it non-decreasing
-        count = 2
-
-        sub = [6,6,1]   | [6,3,1] (original)
-        subStart = 0
-        subEnd = 2
-            | with 4 k left we cannot make this into a non-decreasing so check next sub arrays
-        count = 2
-
-        // reset sub to [] and ++subStart, and set subEnd to subStart
-        sub = [3]
-        subStart = 1
-        subEnd = 1
-        count = 3
-
-        sub = [3,1]
-        subStart = 1
-        subEnd = 2
-            | converted sub = [3,3] k = 5
-        count = 4
-
-        sub = [3,1,2] | [3,3,2]
-        subStart = 1
-        subEnd = 3
-            | converted sub = [3,3,3], k = 4
-        count = 5
-
-        (only if sub.size() - 1 > 2) Now that we've found a case where we can't make a non-decreasing, we extrapolate from subStart to subEnd - 1, other sub arrays that are non-decreasing
-
-        once we get to the end, or case where we cannot get a non-decreasing, the subarray from subStart to subEnd is non-decreasing. Based on the size and the start and end
-        we can also compute other subarrays inside of it that are also valid (so we don't have to recompute work)
-
-
         Idea 2:
         start iterating in `nums` from the front. We will be building subarrays from the front.
         
         Once we build some subarray and we can't get it to be a non-decreasing, we count the number of subarrays that are non-decreasing (leaving out the newest inserted elem).
+            - subtract by 1, as to not double count when we slide the window (see example below).
         Then we can "slide" the window over to the right by 1 and repeat; we can do this because we've enountered a case where we can't build a non-decreasing array anymore. 
             - We can slide because of the guarantee that everything to the left of the newly added elem will be 
             non-decreasing and we can build a new subarray from our old work (eliminates repeated work). (see example below). 
@@ -102,6 +59,99 @@ public:
         non-decreasing count = 17
         */
 
+        long long result {};
+        int myK = k, windowStart {};
+        queue<int> subarray {};
 
+        auto printSubarray = [&subarray]()
+        {
+            queue<int> copy = subarray;
+            cout << "front -> [";
+            while (!copy.empty())
+            {
+                cout << copy.front() << ", ";
+                copy.pop();
+            }
+            cout << "]" << endl;
+        };
+
+        for (int i = 0; i < nums.size(); ++i)
+        {
+            int newElem = nums[i];
+
+            cout << endl;
+            printSubarray();
+            cout << "i: "<<i<<" | newElem: " << newElem << " | currK: " << myK << endl;
+
+            // check non-decreasing (subarrays of size 1 are non-decreasing)
+            if (subarray.size() > 0)
+            {
+                int& back = subarray.back();
+                // cout << "\tback: " << back << endl;
+                if (newElem < back) // need to increment new element to equal back
+                {
+                    myK -= (back - newElem);    // compute how many operations are left over
+                    if (myK >= 0)
+                        newElem = back;
+                    // not able to make non-decreasing subarray with new element
+                    else
+                    {
+                        // count number of non-decreasing subarrays
+                        addSubarrayCount(subarray, result);
+                        // when we shift by 1, we will double count a single subarray of size 1, re-adjust count
+                        if (subarray.size() > 1)
+                            --result;
+
+                        cout << "result: " << result << endl;
+
+                        // shift window over by 1
+                        ++windowStart;
+                        cout << "windowStart: " << windowStart << endl;
+                        subarray.pop(); // remove front element
+
+                        // if the windowStart is the same as `i`, we have a size 1 subarray and
+                        // the element we are trying to add makes the subarray non non-decreasing, we can't shift the window on a size 1 subarray.
+                        if (windowStart == i)
+                        {
+                            --i;
+                            continue;
+                        }
+
+                        // remake the subarray, distribute operations
+                        subarray = {};
+                        subarray.push(nums[windowStart]);
+                        myK = k;
+                        
+                        int subElem {};
+                        bool shiftAgain = false;
+                        for (int start = windowStart + 1; start < i; ++start)
+                        {
+                            printSubarray();
+
+                            int& backElem = subarray.back(); // set new back element
+                            subElem = nums[start];
+                            if (subElem < backElem)
+                            {
+                                myK -= (backElem - subElem);
+                                subElem = backElem;
+                                shiftAgain = (myK < 0);
+                                if (shiftAgain)     // shifting resulted in a non non-decreasing subarray, shfit again
+                                {
+                                    subarray = {};  // clear the subarray
+                                    cout << "bruh what happen?\n";
+                                    break;
+                                }
+                            }
+                            subarray.push(subElem);
+                        }
+                    }
+                }
+            }
+            subarray.push(newElem);    // add element
+        }
+
+        printSubarray();
+        addSubarrayCount(subarray, result);
+        return result;
     }
 };
