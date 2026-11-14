@@ -5,14 +5,76 @@
 class Solution 
 {
 public:
-    void addSubarrayCount(const queue<int>& subarray, long long& result)
-    {
-        int size = subarray.size();
-        result += ((size * (size + 1)) / 2);
-        
-        int count = ((size * (size + 1)) / 2);
-        cout << "subarray size: " << size << " | decreasing subarray's found: " << count << endl;
-    }
+    class SegmentTree
+    {        
+    private:
+        SegmentTree *left = nullptr, *right = nullptr;
+        bool seen = false;
+        int lb {}, rb {};
+
+        string getRangeStr()
+        {
+            string s = "[" + to_string(lb) + ", " + to_string(rb) +"] | " + "length: " + to_string(rb-lb+1);
+            return s;
+        }
+
+    public:
+        SegmentTree(int leftBound, int rightBound) : lb(leftBound), rb(rightBound)
+        {
+            cout << "["<<lb<<", " << rb <<"]" << endl;
+
+            // create children if not a leaf node
+            if (lb + 1 < rb) 
+            {
+                int mid = (lb + rb) / 2;
+                left = new SegmentTree(lb, mid);
+                right = new SegmentTree(mid, rb);
+            }
+        }
+
+        ~SegmentTree()
+        {
+            delete left;
+            delete right;
+        }
+
+        void Update(const int& leftB, const int& rightB)
+        {
+            // update range is outside of node range
+            if (rightB < lb || leftB > rb)
+                return;
+            
+            // node is entirely inside update range
+            if (leftB <= lb && rb <= rightB)
+            {
+                seen = true;
+                cout << "\tupdated " << getRangeStr() << endl;
+                return; // return, we can compute how many children nodes are below this node when we count
+            }
+
+            // update range partially covers this node, check children
+            if (left != nullptr)
+            {
+                left->Update(leftB, rightB);
+                right->Update(leftB, rightB);
+            }
+        }
+
+        void GetSeen(long long& result)
+        {
+            if (seen)
+            {
+                ++result;
+                // cout << getRangeStr() << endl;
+            }
+            
+            if (left != nullptr)
+            {
+                left->GetSeen(result);
+                right->GetSeen(result);
+            }
+        }
+    };
 
     long long countNonDecreasingSubarrays(vector<int>& nums, int k) 
     {
@@ -57,16 +119,20 @@ public:
         7) add, sub = [3,3,3,4,4] k = 4
         8) reached the end of the array, compute non-decreasing count from sub = [3,3,3,4,4], we get 15 here, but note that we double counted one of the elements
         non-decreasing count = 17
+
+        NOTE: this method of counting the subarrays will result in double counting...
+        - use a segment tree to record the range of elements seen, with that we can compute the number of subarrays that are in that range.
         */
 
-        long long result {};
         int myK = k, windowStart {};
         queue<int> subarray {};
+
+        SegmentTree *segTreePtr = new SegmentTree(0, nums.size()-1);
 
         auto printSubarray = [&subarray]()
         {
             queue<int> copy = subarray;
-            cout << "front -> [";
+            cout << "\nfront -> [";
             while (!copy.empty())
             {
                 cout << copy.front() << ", ";
@@ -79,7 +145,6 @@ public:
         {
             int newElem = nums[i];
 
-            cout << endl;
             printSubarray();
             cout << "i: "<<i<<" | newElem: " << newElem << " | currK: " << myK << endl;
 
@@ -96,13 +161,16 @@ public:
                     // not able to make non-decreasing subarray with new element
                     else
                     {
-                        // count number of non-decreasing subarrays
-                        addSubarrayCount(subarray, result);
-                        // when we shift by 1, we will double count a single subarray of size 1, re-adjust count
-                        if (subarray.size() > 1)
-                            --result;
+                        cout << "update seg tree: ["<<windowStart<<", "<<(i-1)<<"]" << endl;
+                        segTreePtr->Update(windowStart, i - 1);
+                        
+                        // // count number of non-decreasing subarrays
+                        // addSubarrayCount(subarray, result);
+                        // // when we shift by 1, we will double count a single subarray of size 1, re-adjust count
+                        // if (subarray.size() > 1)
+                        //     --result;
 
-                        cout << "result: " << result << endl;
+                        // cout << "result: " << result << endl;
 
                         // shift window over by 1
                         ++windowStart;
@@ -130,9 +198,11 @@ public:
 
                             int& backElem = subarray.back(); // set new back element
                             subElem = nums[start];
+                            cout << "subElem: " << subElem << endl;
                             if (subElem < backElem)
                             {
                                 myK -= (backElem - subElem);
+                                cout << "myK: " << myK << endl;
                                 subElem = backElem;
                                 shiftAgain = (myK < 0);
                                 if (shiftAgain)     // shifting resulted in a non non-decreasing subarray, shfit again
@@ -144,14 +214,26 @@ public:
                             }
                             subarray.push(subElem);
                         }
+                        cout << "windowshift end" << endl;
+
+                        if (i+1 == nums.size())
+                        {
+                            --i;
+                            continue;
+                        }
                     }
                 }
             }
             subarray.push(newElem);    // add element
         }
 
+        cout << "\n\n--end algo--";
         printSubarray();
-        addSubarrayCount(subarray, result);
+        cout << "update seg tree: ["<<windowStart<<", "<<(nums.size()-1)<<"]" << endl;
+        segTreePtr->Update(windowStart, nums.size()-1);
+
+        long long result {};
+        segTreePtr->GetSeen(result);
         return result;
     }
 };
