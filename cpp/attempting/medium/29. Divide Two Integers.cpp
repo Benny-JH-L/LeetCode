@@ -1,5 +1,8 @@
 
+#include<climits>
 #include<cmath>
+
+#define big unsigned long long
 
 using namespace std;
 
@@ -54,38 +57,52 @@ public:
         // divisor is equal to base and the difference is negative, return count (3).
         */
 
-        bool isNeg = divisor < 0;
-        divisor = abs(divisor);
+        bool isDivNeg = divisor < 0, isDividendNeg = dividend < 0;
+        big new_divisor = abs((long long)divisor);
+        big new_dividend = abs((long long)dividend);
+        big scaledDivisor = new_divisor;
+        big result{};
 
-        int result {}, baseCount = 1, scaledDivisor = divisor;
-        while (true)
+        int baseCount = 1;
+        if (new_divisor > 1)
         {
-            int diff = (dividend - scaledDivisor);
-
-            if (diff >= 0)
+            while (new_divisor <= new_dividend)
             {
-                dividend = diff;
-                result += baseCount;
+                long long diff = (new_dividend - scaledDivisor);
 
-                // scale up counter and divisor
-                baseCount = baseCount << 1;
-                scaledDivisor = scaledDivisor << 1;
+                if (diff >= 0)
+                {
+                    new_dividend = diff;
+                    result += baseCount;
 
-                // divided evenly, stop
-                if (diff == 0)
-                    break;
-            }
-            else
-            {
-                // check if we subtracted with base divisor, if so and difference is negative stop
-                if (scaledDivisor == divisor)
-                    break;
-                
-                baseCount = 1;
-                scaledDivisor = divisor;
+                    // scale up counter and divisor
+                    baseCount = baseCount << 1;
+                    scaledDivisor = scaledDivisor << 1;
+
+                    // divided evenly, stop
+                    if (diff == 0)
+                        break;
+                }
+                else
+                {
+                    // check if we subtracted with base divisor, if so and difference is negative stop
+                    if (scaledDivisor == new_divisor)
+                        break;
+                    
+                    baseCount = 1;
+                    scaledDivisor = new_divisor;
+                }
             }
         }
+        else
+        {
+            // dividing by 1 gives the dividend
+            if (isDivNeg && isDividendNeg && dividend == INT_MIN)   // check if two negatives and if dividend is -2147483648, if so we need to return 2147483647
+                result = INT_MAX;
+            else
+                result = new_dividend;  
+        }
 
-        return (isNeg ? -result : result);     
+        return (isDivNeg xor isDividendNeg ? -result : result); // make result negative if only one dividend or divisor is negative
     }
 };

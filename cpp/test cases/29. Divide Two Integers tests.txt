@@ -1,0 +1,75 @@
+The test cases are ordered as the:
+dividend = 
+divisor = 
+expected result
+
+dividend =
+2147483647
+divisor =
+2
+1073741823
+
+dividend =
+2147483647
+divisor =
+-2147483648
+0
+
+dividend =
+123541512
+divisor =
+12
+10295126
+
+dividend =
+123541512
+divisor =
+13
+9503193
+
+dividend =
+123541512
+divisor =
+2147483647
+
+dividend =
+-123541512
+divisor =
+-1000001
+123
+
+dividend =
+-2147483647
+divisor =
+1000001
+-2147
+
+dividend =
+-2147483647
+divisor =
+1073741823
+-2
+
+dividend =
+2147483647
+divisor =
+-2147483647
+-1
+
+dividend =
+-2147483648
+divisor =
+-2147483648
+1
+
+dividend =
+-2147483648
+divisor =
+-1
+2147483647
+
+dividend =
+-2147483648
+divisor =
+1
+-2147483648
