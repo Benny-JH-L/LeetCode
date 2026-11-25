@@ -47,7 +47,7 @@ public:
             [2] is for k = 3
             [3] is for k = 2
             [4] is for k = 1
-            when k > 2, we need to products.size() % k to get the right index.
+            we need to products.size() - k to get the right index.
         */
         
         if (products.size() == 0)
@@ -67,11 +67,14 @@ public:
     
     int getProduct(int k) 
     {
-        if (k == 1)
-            return *products[products.size() - 1];
-        if (k == 2)
-            return *products[products.size() - 2];
-        return *products[products.size() % k];
+        cout << "[";
+        for (int* ptr : products)
+        {
+            cout << *ptr << ", ";
+        }
+        cout << "]" << endl;
+
+        return *products[products.size() - k];
     }
 };
 
