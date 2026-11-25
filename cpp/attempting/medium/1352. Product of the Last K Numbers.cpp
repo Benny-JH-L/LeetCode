@@ -1,5 +1,8 @@
 
 #include<vector>
+#include<iostream>
+
+using namespace std;
 
 class ProductOfNumbers 
 {
@@ -67,12 +70,12 @@ public:
     
     int getProduct(int k) 
     {
-        cout << "[";
-        for (int* ptr : products)
-        {
-            cout << *ptr << ", ";
-        }
-        cout << "]" << endl;
+        // cout << "[";
+        // for (int* ptr : products)
+        // {
+        //     cout << *ptr << ", ";
+        // }
+        // cout << "]" << endl;
 
         return *products[products.size() - k];
     }
