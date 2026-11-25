@@ -1,0 +1,39 @@
+
+---Format
+input:
+    string[]
+    int[[int]]
+expected result
+---
+
+["ProductOfNumbers","add","add","add","add","add","getProduct","getProduct","getProduct","add","getProduct"]
+[[],[3],[0],[2],[5],[4],[2],[3],[4],[8],[2]]
+[null,null,null,null,null,null,20,40,0,null,32]
+
+["ProductOfNumbers","add"]
+[[], [100]]
+[null,null]
+
+["ProductOfNumbers","add","add","add","add","add","getProduct","getProduct","getProduct","getProduct"]
+[[],[10],[2],[1],[2],[5],[1],[5],[3],[2]]
+[null,null,null,null,null,null,5,200,10,10]
+
+["ProductOfNumbers","add","add","add","add","add","getProduct","getProduct","getProduct","getProduct","getProduct"]
+[[],[10],[2],[1],[2],[5],[1],[5],[3],[2],[4]]
+[null,null,null,null,null,null,5,200,10,10,20]
+
+["ProductOfNumbers","add","add","add","add","add","getProduct","getProduct","getProduct","getProduct","getProduct"]
+[[],[0],[0],[0],[0],[0],[1],[5],[3],[2],[4]]
+[null,null,null,null,null,null,0,0,0,0,0]
+
+["ProductOfNumbers","add"]
+[[],[0]]
+[null,null]
+
+["ProductOfNumbers", "add", "add", "getProduct"]
+[[],[100], [21], [2]]
+[null,null,null,2100]
+
+["ProductOfNumbers","add","getProduct","getProduct","add","add","getProduct","add","getProduct","add","getProduct","add","getProduct","getProduct","add","getProduct"]
+[[],[7],[1],[1],[4],[5],[3],[4],[4],[3],[4],[8],[1],[6],[2],[3]]
+[null,null,7,7,null,null,140,null,560,null,240,null,8,13440,null,48]
